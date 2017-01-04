@@ -1,6 +1,6 @@
 function Ghost (x, y) {
   this.dir = createVector(0,0);
-  this.pos = createVector(x, y);
+  this.pos = createVector(x,y);
 
   this.color = 'red';
 
@@ -18,9 +18,47 @@ function Ghost (x, y) {
   }
 
   this.update = function () {
+    this.calculateDirection();
     this.checkCollision();
     this.pos.add(this.dir);
     this.checkPortal();
+  }
+
+  this.calculateDirection = function () {
+    var left = !maze.contains(this.pos.x - 1, this.pos.y);
+    var right = !maze.contains(this.pos.x + 1, this.pos.y);
+    var up = !maze.contains(this.pos.x, this.pos.y - 1);
+    var down = !maze.contains(this.pos.x, this.pos.y + 1);
+
+    // make is so they don't randomly turn around
+    if (this.dir.x == -1 && this.dir.y == 0) {
+      right = false;
+    } else if (this.dir.x == 1 && this.dir.y == 0) {
+      left = false;
+    } else if (this.dir.x == 0 && this.dir.y == -1) {
+      down = false;
+    } else if (this.dir.x == 0 && this.dir.y == 1) {
+      up = false;
+    }
+
+    var dirs = [];
+    if (left) {
+      dirs.push([-1,0]);
+    }
+    if (right) {
+      dirs.push([1,0]);
+    }
+    if (up) {
+      dirs.push([0,-1]);
+    }
+    if (down) {
+      dirs.push([0,1]);
+    }
+
+    if (dirs.length > 0) {
+      var dir = dirs[floor(random()*dirs.length)];
+      this.setDir(dir[0],dir[1]);
+    }
   }
 
   this.checkCollision = function () {
