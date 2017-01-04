@@ -1,17 +1,25 @@
-var scl = 40;
+var scl = 30;
 var maze;
+var button;
 
 function setup() {
-  createCanvas(600, 840);
+  createCanvas(15*scl, 21*scl);
   maze = new Maze();
-  maze.initialize();
+  maze.start();
+
+  button = createButton('Start/Reset');
+  button.position(0, height+scl);
+  button.mousePressed(reset);
 }
 
 function draw() {
   background(0);
-
   maze.update();
   maze.show();
+}
+
+function reset() {
+  maze.start();
 }
 
 function keyPressed() {
