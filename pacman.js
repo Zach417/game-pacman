@@ -11,8 +11,36 @@ function Pacman () {
   }
 
   this.setDir = function (x,y) {
-    this.dir.x = x;
-    this.dir.y = y;
+    if (this.dir.x == 0 && this.dir.y == 0) {
+      this.dir.x = x;
+      this.dir.y = y;
+      return;
+    }
+
+    if (x == 0 && y == 0) {
+      this.dir.x = x;
+      this.dir.y = y;
+      return;
+    }
+
+    var movementParallel = true;
+    if (this.dir.x != x && this.dir.y == y) {
+      movementParallel = false;
+    } else if (this.dir.x == x && this.dir.y != y) {
+      movementParallel = false;
+    }
+
+    if (!movementParallel) {
+        this.dir.x = x;
+        this.dir.y = y;
+    } else {
+      var newX = this.pos.x + x;
+      var newY = this.pos.y + y;
+      if (!maze.contains(newX, newY)) {
+          this.dir.x = x;
+          this.dir.y = y;
+      }
+    }
   }
 
   this.update = function () {
