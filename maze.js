@@ -1,6 +1,7 @@
 function Maze () {
-  this.grid = [];
-
+  this.pacman = new Pacman();
+  this.ghosts = [];
+  this.food = [];
   this.grid = [
      [0, 0],[1, 0],[2, 0],[3, 0],[4, 0],[5, 0],[6, 0],[7, 0],[8, 0],[9, 0],[10, 0],[11, 0],[12, 0],[13, 0],[14, 0]
     ,[0, 1]                                          ,[7, 1]                                              ,[14, 1]
@@ -25,25 +26,89 @@ function Maze () {
     ,[0,20],[1,20],[2,20],[3,20],[4,20],[5,20],[6,20],[7,20],[8,20],[9,20],[10,20],[11,20],[12,20],[13,20],[14,20]
   ]
 
+  this.initialize = function () {
+    // setup ghosts
+    this.ghosts[0] = new Ghost(7, 8);
+    this.ghosts[1] = new Ghost(6, 9);
+    this.ghosts[2] = new Ghost(7, 9);
+    this.ghosts[3] = new Ghost(8, 9);
+
+    this.ghosts[0].color = "red";
+    this.ghosts[1].color = "cyan";
+    this.ghosts[2].color = "pink";
+    this.ghosts[3].color = "orange";
+
+    // draw food
+    for (var i = 0; i < 14; i++) {
+      for (var j = 0; j < 20; j++) {
+        if ((i < 3 && j == 9) || (i > 11 && j == 9)) {
+          continue;
+        }
+        if ((i == 7 && (j == 8 || j == 9))) {
+          continue;
+        }
+        if (!this.contains(i,j)) {
+          var food = new Food(i,j);
+          this.food.push(food);
+        }
+      }
+    }
+  }
+
+  this.consumeFood = function (x,y) {
+    for (var i = 0; i < this.food.length; i++) {
+      if (this.food[i].x == x && this.food[i].y == y) {
+        this.food.splice(i, 1);
+      }
+    }
+  }
+
   this.contains = function (x,y) {
     var result = false;
     for (var i = 0; i < this.grid.length; i++) {
       var brick = this.grid[i];
-      if (brick[0] == floor(x / scl) && brick[1] == floor(y / scl)) {
+      if (brick[0] == x && brick[1] == y) {
         result = true;
       }
     }
     return result;
   }
 
-  this.show = function () {
+  this.showFood = function () {
+    for (var i = 0; i < this.food.length; i++) {
+      this.food[i].show();
+    }
+  }
+
+  this.showBricks = function () {
     push();
     fill(0);
-    strokeWeight(4);
+    strokeWeight(1/10*scl);
     stroke('blue');
     for (var i = 0; i < this.grid.length; i++) {
       rect(this.grid[i][0]*scl, this.grid[i][1]*scl, scl, scl);
     }
     pop();
+  }
+
+  this.showGhosts = function () {
+    for (var i = 0; i < this.ghosts.length; i++) {
+      this.ghosts[i].show();
+    }
+  }
+
+  this.update = function () {
+    if (frameCount % 15 == 0) {
+      this.pacman.update();
+    }
+
+    this.consumeFood(this.pacman.pos.x, this.pacman.pos.y);
+  }
+
+  this.show = function () {
+    this.showFood();
+    this.showBricks();
+    this.showGhosts();
+    this.pacman.show();
   }
 }
