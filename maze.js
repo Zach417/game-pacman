@@ -1,4 +1,5 @@
 function Maze () {
+  this.status = "stop";
   this.pacman = new Pacman();
   this.ghosts = [];
   this.food = [];
@@ -26,7 +27,9 @@ function Maze () {
     ,[0,20],[1,20],[2,20],[3,20],[4,20],[5,20],[6,20],[7,20],[8,20],[9,20],[10,20],[11,20],[12,20],[13,20],[14,20]
   ]
 
-  this.initialize = function () {
+  this.start = function () {
+    this.status = "start";
+
     // setup ghosts
     this.ghosts[0] = new Ghost(7, 8);
     this.ghosts[1] = new Ghost(6, 9);
@@ -53,6 +56,10 @@ function Maze () {
         }
       }
     }
+  }
+
+  this.stop = function () {
+    this.status = "stop";
   }
 
   this.consumeFood = function (x,y) {
@@ -98,8 +105,22 @@ function Maze () {
   }
 
   this.update = function () {
+    if (this.status == "stop") {
+      return;
+    }
+
+    if (this.food.length == 0) {
+      this.stop();
+    }
+
     if (frameCount % 15 == 0) {
       this.pacman.update();
+      for (var i = 0; i < this.ghosts.length; i++) {
+        this.ghosts[i].update();
+        if (this.ghosts[i].pos.x == this.pacman.pos.x && this.ghosts[i].pos.y == this.pacman.pos.y) {
+          this.stop();
+        }
+      }
     }
 
     this.consumeFood(this.pacman.pos.x, this.pacman.pos.y);
