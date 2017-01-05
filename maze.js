@@ -30,6 +30,8 @@ function Maze () {
   this.start = function () {
     this.status = "start";
 
+    this.pacman = new Pacman();
+
     // setup ghosts
     this.ghosts[0] = new Ghost(7, 8);
     this.ghosts[1] = new Ghost(6, 9);
