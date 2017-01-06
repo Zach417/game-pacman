@@ -5,7 +5,7 @@ var button;
 function setup() {
   createCanvas(15*scl, 21*scl);
   maze = new Maze();
-  maze.start();
+  maze.initialize();
 
   button = createButton('Start/Reset');
   button.position(0, height+scl);
@@ -24,6 +24,11 @@ function reset() {
 
 function keyPressed() {
   var arrowKeyCodes = [37,38,39,40];
+
+  if (arrowKeyCodes.includes(keyCode) && maze.status != "start") {
+    maze.start();
+  }
+
   if (keyCode == LEFT_ARROW) {
     maze.pacman.setDir(-1,0);
   } else if (keyCode == RIGHT_ARROW) {
