@@ -1,8 +1,15 @@
 function Ghost (x, y) {
   this.dir = createVector(0,0);
   this.pos = createVector(x,y);
-
   this.color = 'red';
+  this.consumable = false;
+  this.consumableColor = "blue";
+  this.consumedTimer = -1;
+
+  this.setConsumable = function () {
+    this.consumable = true;
+    this.consumedTimer = 0;
+  }
 
   this.checkPortal = function () {
     if (this.pos.x <= -1 && this.pos.y == 9) {
@@ -18,6 +25,7 @@ function Ghost (x, y) {
   }
 
   this.update = function () {
+    this.stepConsumedTimer();
     this.calculateDirection();
     this.checkCollision();
     this.pos.add(this.dir);
@@ -69,10 +77,38 @@ function Ghost (x, y) {
     }
   }
 
+  this.stepConsumedTimer = function () {
+    var consumedTimerLength = 25;
+    if (this.consumedTimer >= 0 && this.consumedTimer < consumedTimerLength) {
+      this.consumedTimer += 1;
+    } else if (this.consumedTimer === consumedTimerLength) {
+      this.consumable = false;
+      this.consumedTimer = -1;
+    }
+
+    if (this.consumedTimer == consumedTimerLength - 5) {
+      this.consumableColor = this.color;
+    } else if (this.consumedTimer == consumedTimerLength - 4) {
+      this.consumableColor = "blue";
+    } else if (this.consumedTimer == consumedTimerLength - 3) {
+      this.consumableColor = this.color;
+    } else if (this.consumedTimer == consumedTimerLength - 2) {
+      this.consumableColor = "blue";
+    } else if (this.consumedTimer == consumedTimerLength - 1) {
+      this.consumableColor = this.color;
+    } else if (this.consumedTimer == consumedTimerLength) {
+      this.consumableColor = "blue";
+    }
+  }
+
   this.show = function () {
     push();
     strokeWeight(3/4*scl);
-    stroke(this.color);
+    if (this.consumable === true) {
+      stroke(this.consumableColor);
+    } else {
+      stroke(this.color);
+    }
     point((this.pos.x*scl)+floor(scl/2), (this.pos.y*scl)+floor(scl/2));
     pop();
   }
