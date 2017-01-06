@@ -3,6 +3,7 @@ function Maze () {
   this.pacman = new Pacman();
   this.ghosts = [];
   this.food = [];
+  this.megaFood = [];
   this.grid = [
      [0, 0],[1, 0],[2, 0],[3, 0],[4, 0],[5, 0],[6, 0],[7, 0],[8, 0],[9, 0],[10, 0],[11, 0],[12, 0],[13, 0],[14, 0]
     ,[0, 1]                                          ,[7, 1]                                              ,[14, 1]
@@ -27,12 +28,13 @@ function Maze () {
     ,[0,20],[1,20],[2,20],[3,20],[4,20],[5,20],[6,20],[7,20],[8,20],[9,20],[10,20],[11,20],[12,20],[13,20],[14,20]
   ]
 
-  this.start = function () {
-    this.status = "start";
+  this.initialize = function () {
+    this.initializeGhosts();
+    this.initializeFood();
+  }
 
-    this.pacman = new Pacman();
-
-    // setup ghosts
+  this.initializeGhosts = function () {
+    this.ghosts = [];
     this.ghosts[0] = new Ghost(7, 8);
     this.ghosts[1] = new Ghost(6, 9);
     this.ghosts[2] = new Ghost(7, 9);
@@ -42,16 +44,37 @@ function Maze () {
     this.ghosts[1].color = "cyan";
     this.ghosts[2].color = "pink";
     this.ghosts[3].color = "orange";
+  }
 
-    // draw food
+  this.initializeFood = function () {
+    this.food = [];
     for (var i = 0; i < 14; i++) {
       for (var j = 0; j < 20; j++) {
-        if ((i < 3 && j == 9) || (i > 11 && j == 9)) {
+        // don't place food near portal
+        var portal = false;
+        portal = portal || (i == 0 && j == 9);
+        portal = portal || (i == 1 && j == 9);
+        portal = portal || (i == 2 && j == 9);
+        portal = portal || (i == 12 && j == 9);
+        portal = portal || (i == 13 && j == 9);
+        portal = portal || (i == 14 && j == 9);
+        if (portal) {
           continue;
         }
-        if ((i == 7 && (j == 8 || j == 9))) {
+
+        // set mega food
+        var mega = false;
+        mega = mega || (i == 1 && j == 2);
+        mega = mega || (i == 1 && j == 15);
+        mega = mega || (i == 13 && j == 2);
+        mega = mega || (i == 13 && j == 15);
+        if (mega) {
+          var food = new Food(i,j);
+          food.mega();
+          this.megaFood.push(food);
           continue;
         }
+
         if (!this.contains(i,j)) {
           var food = new Food(i,j);
           this.food.push(food);
@@ -60,8 +83,29 @@ function Maze () {
     }
   }
 
+  this.start = function () {
+    this.status = "start";
+    this.pacman = new Pacman();
+    this.initialize();
+  }
+
   this.stop = function () {
     this.status = "stop";
+  }
+
+  this.setGhostsConsumable = function () {
+    for (var i = 0; i < this.ghosts.length; i++) {
+      this.ghosts[i].setConsumable();
+    }
+  }
+
+  this.consumeMegaFood = function (x, y) {
+    for (var i = 0; i < this.megaFood.length; i++) {
+      if (this.megaFood[i].x == x && this.megaFood[i].y == y) {
+        this.megaFood.splice(i, 1);
+        this.setGhostsConsumable();
+      }
+    }
   }
 
   this.consumeFood = function (x,y) {
@@ -86,6 +130,12 @@ function Maze () {
   this.showFood = function () {
     for (var i = 0; i < this.food.length; i++) {
       this.food[i].show();
+    }
+  }
+
+  this.showMegaFood = function () {
+    for (var i = 0; i < this.megaFood.length; i++) {
+      this.megaFood[i].show();
     }
   }
 
@@ -118,20 +168,31 @@ function Maze () {
     if (frameCount % 15 == 0) {
       this.pacman.update();
       for (var i = 0; i < this.ghosts.length; i++) {
-        this.ghosts[i].update();
-        if (this.ghosts[i].pos.x == this.pacman.pos.x && this.ghosts[i].pos.y == this.pacman.pos.y) {
+        var ghost = this.ghosts[i];
+        ghost.update();
+        if (ghost.consumable) {
+
+        } else if (ghost.pos.x == this.pacman.pos.x && ghost.pos.y == this.pacman.pos.y) {
           this.stop();
         }
       }
     }
 
     this.consumeFood(this.pacman.pos.x, this.pacman.pos.y);
+    this.consumeMegaFood(this.pacman.pos.x, this.pacman.pos.y);
   }
 
   this.show = function () {
     this.showFood();
+    this.showMegaFood();
     this.showBricks();
     this.showGhosts();
     this.pacman.show();
+
+    if (this.status != "start") {
+      fill("yellow");
+      textSize(13/15*scl);
+      text("Ready!", 6*scl, 11*scl, 8*scl, 12*scl);
+    }
   }
 }
