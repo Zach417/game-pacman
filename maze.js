@@ -50,11 +50,13 @@ function Maze () {
     this.food = [];
     for (var i = 0; i < 14; i++) {
       for (var j = 0; j < 20; j++) {
-        // don't place food near portal
+        // don't place food near portal or ghost starting point
         var portal = false;
         portal = portal || (i == 0 && j == 9);
         portal = portal || (i == 1 && j == 9);
         portal = portal || (i == 2 && j == 9);
+        portal = portal || (i == 7 && j == 8);
+        portal = portal || (i == 7 && j == 9);
         portal = portal || (i == 12 && j == 9);
         portal = portal || (i == 13 && j == 9);
         portal = portal || (i == 14 && j == 9);
